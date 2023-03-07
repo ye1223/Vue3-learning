@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        //源数据
+        let person = {
+            name:'张三',
+            age:18
+        }
+        //模拟vue2实现响应式
+        /* let p ={}
+        Object.defineProperty(p,'name',{
+            configurable:true,//可配置
+            get(){//有人读取name时调用
+                return person.name
+            },
+            set(value){//有人修改name时调用
+                console.log('有人修改了name属性，发现，并更新界面')
+                person.name = value
+            }
+        })
+        Object.defineProperty(p,'age',{
+            get(){//有人读取age时调用
+                return person.age
+            },
+            set(value){//有人修改age时调用
+                console.log('有人修改了age属性，发现，并更新界面')
+                person.age = value
+            }
+        })
+        //!也可以用Object.keys() 获取对象所有属性，再循环遍历修改各属性 */
+
+
+        //模拟Vue3实现响应式 (一对getter和setter即可处理源数据中的响应式)
+        //#region 
+        //p代理数据（对象） | person 源数据（对象）
+        const p = new Proxy(person,{
+            //读取p的属性
+            get(target,propName){
+                console.log(`有人读取了p身上的 属性${propName}`)
+                return propName
+            },
+            //修改、增加p的属性
+            set(target,propName,value){
+                console.log(`有人修改了p身上的属性${propName},并将其值修改为${value}，并去更新界面了`)
+                target[propName] = value //真正引起值的变化
+            },
+            //删除p的属性
+            deleteProperty(target,propName){
+                console.log(`有人删除了p身上的 属性${propName}，并去更新页面了`)
+                return delete target[propName]
+            }
+        })
+        
+        //#endregion
+
+        //#region 
+        let obj = {
+            a:1,
+            b:2
+        }
+        console.log(obj.a)//1
+        console.log(Reflect.get(obj,'a'))//1
+
+        Reflect.set(obj,'a',666)//修改obj属性a的值为666
+        Reflect.deleteProperty(obj,'b')
+        //将Object身上的方法迁移到Reflect身上
+        //会返回错误，而不像Object.defineProperty一样抛出错误导致程序崩溃（必用try catch）
+        Reflect.defineProperty(obj,'c',{
+            get(){
+                return 100
+            }
+        })
+        //#endregion
+        
+        const p1 = new Proxy(person,{
+            //读取p的属性
+            get(target,propName){
+                console.log(`有人读取了p身上的 属性${propName}`)
+                return Reflect.get(target,propName)
+            },
+            //修改、增加p的属性
+            set(target,propName,value){
+                console.log(`有人修改了p身上的属性${propName},并将其值修改为${value}，并去更新界面了`)
+                Reflect.set(target,propName,value) //真正引起值的变化
+            },
+            //删除p的属性
+            deleteProperty(target,propName){
+                console.log(`有人删除了p身上的 属性${propName}，并去更新页面了`)
+                return Reflect.deleteProperty(target,propName)
+            }
+        })
+
+
+    </script>
+</body>
+</html>
